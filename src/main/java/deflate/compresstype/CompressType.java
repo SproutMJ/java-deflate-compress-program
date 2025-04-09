@@ -1,4 +1,6 @@
-package service;
+package deflate.compresstype;
+
+import deflate.util.BitUtil;
 
 public enum CompressType {
     NONE(BitUtil.init(0, 2)),

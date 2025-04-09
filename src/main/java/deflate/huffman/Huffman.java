@@ -1,4 +1,6 @@
-package service;
+package deflate.huffman;
+
+import deflate.util.BitUtil;
 
 import java.util.ArrayList;
 import java.util.Comparator;

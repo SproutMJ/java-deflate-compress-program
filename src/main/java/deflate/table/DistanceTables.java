@@ -1,4 +1,4 @@
-package service;
+package deflate.table;
 
 public final class DistanceTables {
     public static final int[][] CODE_EQUAL_BASE_CODE_EXTRABIT = {

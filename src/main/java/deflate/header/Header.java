@@ -1,4 +1,4 @@
-package service;
+package deflate.header;
 
 import java.util.List;
 import java.util.Map;

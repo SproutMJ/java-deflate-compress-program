@@ -1,4 +1,4 @@
-package service;
+package deflate.stream;
 
 import java.io.Closeable;
 import java.io.IOException;

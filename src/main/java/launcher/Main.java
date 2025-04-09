@@ -1,6 +1,6 @@
 package launcher;
 
-import service.Deflate;
+import deflate.Deflate;
 
 import java.util.ArrayList;
 import java.util.Arrays;

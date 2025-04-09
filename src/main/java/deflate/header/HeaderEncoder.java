@@ -1,11 +1,13 @@
-package service;
+package deflate.header;
+
+import deflate.huffman.Huffman;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static service.Header.createEncodedHeader;
+import static deflate.header.Header.createEncodedHeader;
 
 public class HeaderEncoder {
     public Header encodeHeader(long bfinal, long btype, int[] literalLengths, int[] distanceLengths) {

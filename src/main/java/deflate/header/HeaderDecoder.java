@@ -1,4 +1,9 @@
-package service;
+package deflate.header;
+
+import deflate.util.BitUtil;
+import deflate.compresstype.CompressType;
+import deflate.huffman.Huffman;
+import deflate.stream.InputStream;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -1,4 +1,16 @@
-package service;
+package deflate;
+
+import deflate.compresstype.CompressType;
+import deflate.header.Header;
+import deflate.header.HeaderDecoder;
+import deflate.header.HeaderEncoder;
+import deflate.huffman.Huffman;
+import deflate.lz77.LZ77;
+import deflate.stream.InputStream;
+import deflate.stream.OutputStream;
+import deflate.table.DistanceTables;
+import deflate.table.LengthTables;
+import deflate.util.BitUtil;
 
 import java.io.File;
 import java.io.FileInputStream;

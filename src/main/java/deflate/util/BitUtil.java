@@ -1,4 +1,4 @@
-package service;
+package deflate.util;
 
 import java.util.List;
 

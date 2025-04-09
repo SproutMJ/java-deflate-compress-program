@@ -1,4 +1,4 @@
-package service;
+package deflate.lz77;
 
 import java.util.ArrayList;
 import java.util.List;
