@@ -8,7 +8,7 @@ public class LZ77 {
     private static final int WINDOW_SIZE = 32768;
     private static final int LOOKAHEAD_SIZE = 258;
 
-    static class Triple {
+    public static class Triple {
         int offset;
         int length;
         byte nextByte;
@@ -17,6 +17,18 @@ public class LZ77 {
             this.offset = offset;
             this.nextByte = nextByte;
             this.length = length;
+        }
+
+        public int getOffset() {
+            return offset;
+        }
+
+        public int getLength() {
+            return length;
+        }
+
+        public byte getNextByte() {
+            return nextByte;
         }
 
         @Override

@@ -136,24 +136,24 @@ public class Deflate {
 
     private void bitOutLZ77(List<LZ77.Triple> compressed, OutputStream bitOut, Map<Integer, Long> literalCode, Map<Integer, Long> distanceCode) throws IOException {
         for (LZ77.Triple triple : compressed) {
-            if (triple.length == 0) {
-                bitOut.writeBit(literalCode.get((int) triple.nextByte), Math.toIntExact(BitUtil.extractBits(literalCode.get((int) triple.nextByte)).get(1)));
+            if (triple.getLength() == 0) {
+                bitOut.writeBit(literalCode.get((int) triple.getNextByte()), Math.toIntExact(BitUtil.extractBits(literalCode.get((int) triple.getNextByte())).get(1)));
             } else {
-                int[] codee = LengthTables.LENGTH_EQUAL_CODE_BASE_EXTRABIT[triple.length];
+                int[] codee = LengthTables.LENGTH_EQUAL_CODE_BASE_EXTRABIT[triple.getLength()];
                 bitOut.writeBit(literalCode.get(codee[0]), Math.toIntExact(BitUtil.extractBits(literalCode.get(codee[0])).get(1)));
                 int extraBitCount = codee[2];
                 if (extraBitCount > 0) {
-                    bitOut.writeBit(triple.length - codee[1], extraBitCount);
+                    bitOut.writeBit(triple.getLength() - codee[1], extraBitCount);
                 }
 
-                int[] offset = DistanceTables.search(triple.offset);
+                int[] offset = DistanceTables.search(triple.getOffset());
                 bitOut.writeBit(distanceCode.get(offset[1]), Math.toIntExact(BitUtil.extractBits(distanceCode.get(offset[1])).get(1)));
                 extraBitCount = offset[2];
                 if (extraBitCount > 0) {
-                    bitOut.writeBit(triple.offset - offset[0], extraBitCount);
+                    bitOut.writeBit(triple.getOffset() - offset[0], extraBitCount);
                 }
 
-                bitOut.writeBit(literalCode.get((int) triple.nextByte), Math.toIntExact(BitUtil.extractBits(literalCode.get((int) triple.nextByte)).get(1)));
+                bitOut.writeBit(literalCode.get((int) triple.getNextByte()), Math.toIntExact(BitUtil.extractBits(literalCode.get((int) triple.getNextByte())).get(1)));
             }
         }
     }
@@ -189,9 +189,9 @@ public class Deflate {
     private Map<Integer, Long> makeLengthFrequency(List<LZ77.Triple> compressed) {
         Map<Integer, Long> literalLengthFrequency = new HashMap<>();
         for (LZ77.Triple triple : compressed) {
-            int[] code = LengthTables.LENGTH_EQUAL_CODE_BASE_EXTRABIT[triple.length];
+            int[] code = LengthTables.LENGTH_EQUAL_CODE_BASE_EXTRABIT[triple.getLength()];
             literalLengthFrequency.put(code[0], literalLengthFrequency.getOrDefault(code[0], 0L) + 1);
-            literalLengthFrequency.put((int) triple.nextByte, literalLengthFrequency.getOrDefault((int) triple.nextByte, 0L) + 1);
+            literalLengthFrequency.put((int) triple.getNextByte(), literalLengthFrequency.getOrDefault((int) triple.getNextByte(), 0L) + 1);
         }
         literalLengthFrequency.put(256, 1L);
 
@@ -201,8 +201,8 @@ public class Deflate {
     private Map<Integer, Long> makeDistanceFrequency(List<LZ77.Triple> compressed) {
         Map<Integer, Long> distanceFrequency = new HashMap<>();
         for (LZ77.Triple triple : compressed) {
-            if (triple.offset > 0) {
-                int[] offsetCode = DistanceTables.search(triple.offset);
+            if (triple.getOffset() > 0) {
+                int[] offsetCode = DistanceTables.search(triple.getOffset());
                 distanceFrequency.put(offsetCode[1], distanceFrequency.getOrDefault(offsetCode[1], 0L) + 1);
             }
         }
