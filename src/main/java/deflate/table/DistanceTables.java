@@ -31,16 +31,25 @@ public final class DistanceTables {
         {8193, 26, 12},
         {12289, 27, 12},
         {16385, 28, 13},
-        {24577, 29, 13}
+        {24577, 29, 13},
+        //dummy
+        {32769, 0, 0}
     };
 
-    public static int[] search(int distance) {
-        for (int i = CODE_EQUAL_BASE_CODE_EXTRABIT.length - 1; i >= 0; i--) {
-            if(CODE_EQUAL_BASE_CODE_EXTRABIT[i][0] <= distance){
-                return CODE_EQUAL_BASE_CODE_EXTRABIT[i];
-            }
-        }
+    private static final int[] LOOKUP_TABLE = new int[32768 + 1];
 
-        throw new RuntimeException("offset error");
+    static {
+        int index = 0;
+        for (int distance = 1; distance <= 32768; distance++) {
+            if(CODE_EQUAL_BASE_CODE_EXTRABIT[index + 1][0] == distance) {
+                index++;
+            }
+            LOOKUP_TABLE[distance] = index;
+        }
+    }
+
+
+    public static int[] search(int distance) {
+        return CODE_EQUAL_BASE_CODE_EXTRABIT[LOOKUP_TABLE[distance]];
     }
 }
