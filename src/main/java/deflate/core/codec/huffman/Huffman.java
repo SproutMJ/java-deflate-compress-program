@@ -1,6 +1,6 @@
-package deflate.huffman;
+package deflate.core.codec.huffman;
 
-import deflate.util.BitUtil;
+import deflate.core.util.BitUtil;
 
 import java.util.ArrayList;
 import java.util.Comparator;

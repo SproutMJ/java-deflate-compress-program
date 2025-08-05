@@ -1,4 +1,4 @@
-package deflate.lz77;
+package deflate.core.codec.lz77;
 
 import java.util.ArrayList;
 import java.util.List;

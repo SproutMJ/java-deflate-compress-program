@@ -1,4 +1,4 @@
-package deflate.header;
+package deflate.core.codec.header;
 
 import java.util.List;
 import java.util.Map;

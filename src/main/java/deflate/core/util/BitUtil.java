@@ -1,4 +1,4 @@
-package deflate.util;
+package deflate.core.util;
 
 import java.util.List;
 

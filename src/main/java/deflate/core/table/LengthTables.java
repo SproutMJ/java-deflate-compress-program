@@ -1,4 +1,4 @@
-package deflate.table;
+package deflate.core.table;
 
 public final class LengthTables {
 

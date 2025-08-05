@@ -1,6 +1,6 @@
-package deflate.compresstype;
+package deflate.core.codec.type;
 
-import deflate.util.BitUtil;
+import deflate.core.util.BitUtil;
 
 public enum CompressType {
     NONE(BitUtil.init(0, 2)),

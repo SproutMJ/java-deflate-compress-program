@@ -1,4 +1,4 @@
-package deflate.stream;
+package deflate.core.io;
 
 import java.io.IOException;
 

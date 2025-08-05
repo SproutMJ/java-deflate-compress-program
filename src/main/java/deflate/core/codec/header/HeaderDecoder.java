@@ -1,9 +1,9 @@
-package deflate.header;
+package deflate.core.codec.header;
 
-import deflate.util.BitUtil;
-import deflate.compresstype.CompressType;
-import deflate.huffman.Huffman;
-import deflate.stream.InputStream;
+import deflate.core.codec.huffman.Huffman;
+import deflate.core.codec.type.CompressType;
+import deflate.core.io.InputStream;
+import deflate.core.util.BitUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
