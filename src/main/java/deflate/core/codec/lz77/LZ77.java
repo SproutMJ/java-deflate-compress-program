@@ -75,19 +75,21 @@ public class LZ77 {
     public byte[] decode(List<Triple> triples) {
         List<Byte> decoded = new ArrayList<>();
 
-        for (Triple triple : triples) {
-            // 리터럴인 경우: offset과 length가 0이면 단일 바이트를 추가
+        for (int idx = 0; idx < triples.size(); idx++) {
+            Triple triple = triples.get(idx);
+
             if (triple.offset == 0 && triple.length == 0) {
                 decoded.add(triple.nextByte);
             } else {
-                // 디코딩할 때, 이미 복원된 데이터를 참조하여 길이만큼 복사 (오버랩 복사 지원)
                 int start = decoded.size() - triple.offset;
                 for (int i = 0; i < triple.length; i++) {
-                    // 오버랩된 영역도 정상적으로 복사되도록, 매번 현재 리스트에서 읽음
                     decoded.add(decoded.get(start + i));
                 }
-                // 그 후에 다음 바이트 추가
-                decoded.add(triple.nextByte);
+
+                //마지막 triple이고 nextByte가 0이면 추가하지 않음
+                if (!(idx == triples.size() - 1 && triple.nextByte == 0)) {
+                    decoded.add(triple.nextByte);
+                }
             }
         }
 
