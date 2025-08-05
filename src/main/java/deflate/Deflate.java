@@ -17,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,11 @@ public class Deflate {
                 if (bytesReadTotal == fileSize) {
                     bfinal = BitUtil.addBit(0L, 1);
                 }
+
+                if(bytesRead != BUFFER_SIZE) {
+                    buffer = Arrays.copyOf(buffer, bytesRead);
+                }
+
                 //압축 방식 결정
                 long btype = determineCompressType(buffer);
 
