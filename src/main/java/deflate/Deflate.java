@@ -79,7 +79,7 @@ public class Deflate {
 
     private void dynamicCompress(byte[] data, OutputStream bitOut, long bfinal, long btype) throws IOException {
         //1단계 LZ77
-        List<LZ77.Triple> compressed = lz77.generateCodes(data);
+        LZ77.EncodingResult compressed = lz77.generateCodes(data);
 
         //2단계 허프만 트리 생성
         Map<Integer, Long> literalLengthFrequency = makeLengthFrequency(compressed);
@@ -140,26 +140,32 @@ public class Deflate {
         bitOut.writeBit(literalCode.get(256), Math.toIntExact(BitUtil.extractBits(literalCode.get(256)).get(1)));
     }
 
-    private void bitOutLZ77(List<LZ77.Triple> compressed, OutputStream bitOut, Map<Integer, Long> literalCode, Map<Integer, Long> distanceCode) throws IOException {
-        for (LZ77.Triple triple : compressed) {
-            if (triple.getLength() == 0) {
-                bitOut.writeBit(literalCode.get((int) triple.getNextByte()), Math.toIntExact(BitUtil.extractBits(literalCode.get((int) triple.getNextByte())).get(1)));
+    private void bitOutLZ77(LZ77.EncodingResult compressed, OutputStream bitOut, Map<Integer, Long> literalCode, Map<Integer, Long> distanceCode) throws IOException {
+        int count = compressed.getCount();
+        int[] offsets = compressed.getOffsets();
+        int[] lengths = compressed.getLengths();
+        byte[] nextBytes = compressed.getNextBytes();
+
+        for (int i = 0; i < count; i++) {
+            if (lengths[i] == 0) {
+                bitOut.writeBit(literalCode.get((int) nextBytes[i]), Math.toIntExact(BitUtil.extractBits(literalCode.get((int) nextBytes[i])).get(1)));
             } else {
-                int[] codee = LengthTables.LENGTH_EQUAL_CODE_BASE_EXTRABIT[triple.getLength()];
+                int[] codee = LengthTables.LENGTH_EQUAL_CODE_BASE_EXTRABIT[lengths[i]];
                 bitOut.writeBit(literalCode.get(codee[0]), Math.toIntExact(BitUtil.extractBits(literalCode.get(codee[0])).get(1)));
                 int extraBitCount = codee[2];
                 if (extraBitCount > 0) {
-                    bitOut.writeBit(triple.getLength() - codee[1], extraBitCount);
+                    bitOut.writeBit(lengths[i] - codee[1], extraBitCount);
                 }
 
-                int[] offset = DistanceTables.search(triple.getOffset());
+                int[] offset = DistanceTables.search(offsets[i]);
+
                 bitOut.writeBit(distanceCode.get(offset[1]), Math.toIntExact(BitUtil.extractBits(distanceCode.get(offset[1])).get(1)));
                 extraBitCount = offset[2];
                 if (extraBitCount > 0) {
-                    bitOut.writeBit(triple.getOffset() - offset[0], extraBitCount);
+                    bitOut.writeBit(offsets[i] - offset[0], extraBitCount);
                 }
 
-                bitOut.writeBit(literalCode.get((int) triple.getNextByte()), Math.toIntExact(BitUtil.extractBits(literalCode.get((int) triple.getNextByte())).get(1)));
+                bitOut.writeBit(literalCode.get((int) nextBytes[i]), Math.toIntExact(BitUtil.extractBits(literalCode.get((int) nextBytes[i])).get(1)));
             }
         }
     }
@@ -192,23 +198,29 @@ public class Deflate {
         }
     }
 
-    private Map<Integer, Long> makeLengthFrequency(List<LZ77.Triple> compressed) {
+    private Map<Integer, Long> makeLengthFrequency(LZ77.EncodingResult compressed) {
+        int count = compressed.getCount();
+        int[] lengths = compressed.getLengths();
+        byte[] nextBytes = compressed.getNextBytes();
+
         Map<Integer, Long> literalLengthFrequency = new HashMap<>();
-        for (LZ77.Triple triple : compressed) {
-            int[] code = LengthTables.LENGTH_EQUAL_CODE_BASE_EXTRABIT[triple.getLength()];
+        for (int  i = 0; i < count; i++) {
+            int[] code = LengthTables.LENGTH_EQUAL_CODE_BASE_EXTRABIT[lengths[i]];
             literalLengthFrequency.put(code[0], literalLengthFrequency.getOrDefault(code[0], 0L) + 1);
-            literalLengthFrequency.put((int) triple.getNextByte(), literalLengthFrequency.getOrDefault((int) triple.getNextByte(), 0L) + 1);
+            literalLengthFrequency.put((int) nextBytes[i], literalLengthFrequency.getOrDefault((int) nextBytes[i], 0L) + 1);
         }
         literalLengthFrequency.put(256, 1L);
 
         return literalLengthFrequency;
     }
 
-    private Map<Integer, Long> makeDistanceFrequency(List<LZ77.Triple> compressed) {
+    private Map<Integer, Long> makeDistanceFrequency(LZ77.EncodingResult compressed) {
+        int count = compressed.getCount();
+        int[] offsets = compressed.getOffsets();
         Map<Integer, Long> distanceFrequency = new HashMap<>();
-        for (LZ77.Triple triple : compressed) {
-            if (triple.getOffset() > 0) {
-                int[] offsetCode = DistanceTables.search(triple.getOffset());
+        for (int i = 0; i < count; i++) {
+            if (offsets[i] > 0) {
+                int[] offsetCode = DistanceTables.search(offsets[i]);
                 distanceFrequency.put(offsetCode[1], distanceFrequency.getOrDefault(offsetCode[1], 0L) + 1);
             }
         }
@@ -244,8 +256,8 @@ public class Deflate {
                     Map<Long, Integer> distanceTree = decodedHeaderInfo.getDistanceTree();
 
                     // LZ77 블록 복구 및 원본 파일 복원
-                    List<LZ77.Triple> triples = decompressBlock(bis, literalTree, distanceTree);
-                    byte[] decode = lz77.decode(triples);
+                    LZ77.EncodingResult result = decompressBlock(bis, literalTree, distanceTree);
+                    byte[] decode = lz77.decode(result);
                     fos.write(decode, 0, decode.length);
                 } else {
                     throw new RuntimeException("Unrecognized compress type.");
@@ -254,17 +266,17 @@ public class Deflate {
         }
     }
 
-    private List<LZ77.Triple> decompressBlock(InputStream bis,
+    private LZ77.EncodingResult decompressBlock(InputStream bis,
                                               Map<Long, Integer> literalTree,
                                               Map<Long, Integer> distanceTree) throws IOException {
-        List<LZ77.Triple> triples = new ArrayList<>();
+        LZ77.EncodingResult encodingResult = new LZ77.EncodingResult(64);
         while (true) {
             // 리터럴/길이 코드 읽기
             int symbol = decodeSymbol(literalTree, 15, bis);
             if (symbol == 256) {
                 break;
             } else if (symbol < 256) {
-                triples.add(new LZ77.Triple(0, 0, (byte) symbol));
+                encodingResult.add(0, 0, (byte) symbol);
             } else {
                 // 길이-거리 쌍 처리
                 int length = decodeLength(symbol, bis);
@@ -277,11 +289,11 @@ public class Deflate {
 
                 // 다음 바이트 읽기
                 byte nextByte = (byte) symbol;
-                triples.add(new LZ77.Triple(distance, length, nextByte));
+                encodingResult.add(distance, length, nextByte);
             }
         }
 
-        return triples;
+        return encodingResult;
     }
 
     private int decodeSymbol(Map<Long, Integer> tree, int limit, InputStream bis) throws IOException {
