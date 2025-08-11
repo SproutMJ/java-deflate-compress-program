@@ -1,10 +1,8 @@
 package deflate;
 
 import deflate.core.codec.CompressTypeDetector;
-import deflate.core.codec.compressor.Compressor;
-import deflate.core.codec.CompressorFactoryDetector;
-import deflate.core.codec.compressorfactory.CompressorFactory;
-import deflate.core.codec.compressorwriter.Writer;
+import deflate.core.codec.CompressorCodecDetector;
+import deflate.core.codec.compressorfactory.Codec;
 import deflate.core.codec.header.Header;
 import deflate.core.codec.header.HeaderDecoder;
 import deflate.core.codec.lz77.LZ77Service;
@@ -35,7 +33,7 @@ public class Deflate {
             byte[] buffer = new byte[BUFFER_SIZE];
             int bytesRead;
 
-            CompressorFactoryDetector compressorFactoryDetector = new CompressorFactoryDetector(new CompressTypeDetector());
+            CompressorCodecDetector compressorCodecDetector = new CompressorCodecDetector(new CompressTypeDetector());
             while ((bytesRead = fis.read(buffer)) != -1) {
                 bytesReadTotal += bytesRead;
                 long bfinal = BitUtil.addBit(0L, 0);
@@ -48,12 +46,9 @@ public class Deflate {
                 }
 
                 //압축 방식 결정
-                CompressorFactory compressorFactory = compressorFactoryDetector.createCompressorFactory(buffer);
-                Compressor compressor = compressorFactory.getCompressor();
-                Writer writer = compressorFactory.getWriter();
-
+                Codec codec = compressorCodecDetector.createCompressorCodec(buffer);
                 bitOut.writeBit(bfinal, 1);
-                writer.write(compressor.compress(buffer), bitOut);
+                codec.compressAndWrite(buffer, bitOut);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
