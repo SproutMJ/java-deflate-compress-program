@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
-public class Huffman {
+public class HuffmanService {
     class HuffmanNode implements Comparable<HuffmanNode> {
         int symbol;
         long frequency;

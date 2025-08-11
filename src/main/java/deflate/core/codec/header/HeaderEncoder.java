@@ -1,6 +1,6 @@
 package deflate.core.codec.header;
 
-import deflate.core.codec.huffman.Huffman;
+import deflate.core.codec.huffman.HuffmanService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,10 +40,10 @@ public class HeaderEncoder {
         List<Integer> rleEncoded = applyRLE(combinedLengths);
 
         // 3. 코드 길이 알파벳에 대한 코드 길이 생성
-        Huffman huffman = new Huffman();
+        HuffmanService huffmanService = new HuffmanService();
         Map<Integer, Long> rleFrequency = makeRleFrequency(rleEncoded);
-        Map<Integer, Integer> lengths = huffman.buildTreeLengthWithLimit(rleFrequency, 7);
-        Map<Integer, Long> codes = huffman.generateCanonicalCodes(lengths);
+        Map<Integer, Integer> lengths = huffmanService.buildTreeLengthWithLimit(rleFrequency, 7);
+        Map<Integer, Long> codes = huffmanService.generateCanonicalCodes(lengths);
 
         int maxCodeLengthCode = Header.CODE_LENGTH_CODE_ORDER.length;
         for (; maxCodeLengthCode >= 0; maxCodeLengthCode--) {

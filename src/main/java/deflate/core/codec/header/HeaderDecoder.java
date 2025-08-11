@@ -1,6 +1,6 @@
 package deflate.core.codec.header;
 
-import deflate.core.codec.huffman.Huffman;
+import deflate.core.codec.huffman.HuffmanService;
 import deflate.core.codec.type.CompressType;
 import deflate.core.io.InputStream;
 import deflate.core.util.BitUtil;
@@ -84,8 +84,8 @@ public class HeaderDecoder {
 
     private Map<Long, Integer> reconstructReverseHuffmanTree(Map<Integer, Integer> codeLengths) {
         Map<Long, Integer> huffmanTree = new HashMap<>();
-        Huffman huffman = new Huffman();
-        Map<Integer, Long> codes = huffman.generateCanonicalCodes(codeLengths);
+        HuffmanService huffmanService = new HuffmanService();
+        Map<Integer, Long> codes = huffmanService.generateCanonicalCodes(codeLengths);
         for (Map.Entry<Integer, Long> entry : codes.entrySet()) {
             huffmanTree.put(entry.getValue(), entry.getKey());
         }

@@ -2,7 +2,7 @@ package deflate.core.codec.lz77;
 
 import java.util.Arrays;
 
-public class LZ77 {
+public class LZ77Service {
     private static final int WINDOW_SIZE = 32768;
     private static final int LOOKAHEAD_SIZE = 258;
     private static final int HASH_SIZE = 65536;
@@ -12,7 +12,7 @@ public class LZ77 {
     private final int[] hashHead;
     private final int[] prev;
 
-    public LZ77() {
+    public LZ77Service() {
         hashHead = new int[HASH_SIZE];
         prev = new int[WINDOW_SIZE];
         Arrays.fill(hashHead, -1);
